@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+import sys
+import requests
+import os
+import json
+from optparse import OptionParser
+
+cmd_parser = OptionParser(version="%prog 0.1")
+cmd_parser.add_option("-d", "--debug", action="store_true", dest="bug", help="debug mode", default=False)
+cmd_parser.add_option("-v", "--verb", action="store", dest="verb", help="verb to use: get, post, delete. default=get", default="get")
+cmd_parser.add_option("-j", "--json", action="store", dest="jsonfile", help="json document to post", default=None)
+(cmd_options, cmd_args) = cmd_parser.parse_args()
+
+def returnjson(r):
+    print("status code: %s" % (str(r.status_code)))
+    print(json.dumps(r.json(), indent=4, sort_keys=True))
+
+if cmd_args:
+    url = cmd_args[0]
+else:
+    sys.exit("You must provide at least a URL")
+
+data = None
+if cmd_options.jsonfile:
+    if os.path.exists(cmd_options.jsonfile):
+     f = open(cmd_options.jsonfile)
+     try:
+       data = json.loads(f.read())
+     finally:
+       f.close()
+    else:
+     sys.exit("No json file %s found!" % cmd_options.jsonfile)
+
+if cmd_options.bug:
+    print(data)
+
+if cmd_options.verb == 'delete':
+    r = requests.delete(url)
+    returnjson(r)
+elif cmd_options.verb == 'post':
+    if data:
+        r = requests.post(url, json=data)
+    else:
+        r = requests.post(url)
+    returnjson(r)
+else:
+    if data:
+        r = requests.post(url, json=data)
+    else:
+        r = requests.get(url)
+    returnjson(r)
