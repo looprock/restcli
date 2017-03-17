@@ -43,6 +43,12 @@ elif cmd_options.verb == 'post':
     else:
         r = requests.post(url)
     returnjson(r)
+elif cmd_options.verb == 'put':
+    if data:
+        r = requests.put(url, json=data)
+    else:
+        r = requests.put(url)
+    returnjson(r)
 else:
     if data:
         r = requests.post(url, json=data)
